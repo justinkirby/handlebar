@@ -1,0 +1,19 @@
+%% -*- mode: erlang -*-
+{application, handlebar,
+ [
+  {description, "CLI for Mustache "},
+  {vsn, git},
+  {applications,
+   [ kernel,
+     stdlib,
+     sasl
+   ]},
+  {modules,
+   [ handlebar
+   ]
+  },
+  {registered, []},
+  {env, [ ] },
+  {mods,[]}
+
+ ]}.
