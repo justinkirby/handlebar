@@ -9,7 +9,7 @@ find no easy way to regenerate the app.config from a different vars
 file without regenerating the entire release.
 
 Using handlebar I can now generate app.config files for new installs
-of erlang apps.
+of Erlang apps.
 
 ** Installation
    To compile the code you will need [[https://github.com/basho/rebar/][rebar]] in your path. Then do:
@@ -24,7 +24,7 @@ of erlang apps.
 
    handlebar finds files by optionally recursively walking directories
    and determines what do with the files based on extension. It needs
-   at least one variable file and one tempalate file in order to do
+   at least one variable file and one template file in order to do
    anything.
 
    The following will load one.vars as a variable file and once.src as
@@ -60,7 +60,7 @@ of erlang apps.
    #+end_src
 
 
-   The key to understanding the behaviour of handlebar is that it
+   The key to understanding the behavior of handlebar is that it
    recursively walks the paths provided as arguments (even if the path
    is a file, the file will just be loaded). Any variable file that is
    found is parsed with file:consult/1 and the resulting proplists are
@@ -74,7 +74,7 @@ of erlang apps.
 
 *** variable files
    A variable file is the file which lists the variables and their
-   values in erlang syntax. It must be readable by =file:consult/1=
+   values in Erlang syntax. It must be readable by =file:consult/1=
    #+begin_src erlang
      {one, 1}.
      {two, 2}.
