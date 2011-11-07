@@ -6,14 +6,24 @@
   {applications,
    [ kernel,
      stdlib,
-     sasl
+     sasl,
+     mustache
    ]},
-  {modules,
-   [ handlebar
-   ]
+  {modules, [ getopt,
+              handlebar,
+              handlebar_config,
+              handlebar_render,
+              handlebar_walker,
+              handlebar_log
+            ]
   },
   {registered, []},
-  {env, [ ] },
+  {env, [
+         {template_ext, "src"},
+         {vars_ext, "vars"},
+         {outdir,  undefined},
+         {outfile, undefined}
+ ] },
   {mods,[]}
 
  ]}.

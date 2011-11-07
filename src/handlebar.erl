@@ -8,6 +8,10 @@
          main/1
         ]).
 
+
+-include("handlebar.hrl").
+
+
 main(Args) ->
     case catch(run(Args)) of
         ok ->
@@ -32,6 +36,7 @@ run_aux(["version"]) ->
     version(),
     ok;
 run_aux(Args) ->
+    handlebar_log:init(),
     handlebar_render:process(Args),
     ok.
 
@@ -46,11 +51,13 @@ parse_args(Args) ->
 
             set_global_flag(Options, verbose),
             set_global_flag(Options, force),
-            %% set_global_var(Options, template_ext),
-            %% set_global_var(Options, vars_ext),
-            %% set_global_var(Options, outdir),
-            %% set_global_var(Options, outfile);
-            io:format("opts ~p~nnopts ~p~n",[Options, NonOptArgs]);
+            set_global_flag(Options, recurse),
+            set_global_var(Options, template_ext),
+            set_global_var(Options, vars_ext),
+            set_global_var(Options, outdir),
+            set_global_var(Options, outfile),
+
+            NonOptArgs;
 
         {error, {Reason, Data}} ->
             io:format("Error: ~s ~p~n~n", [Reason, Data]),
@@ -80,6 +87,16 @@ set_global_flag(Options, Flag) ->
             end,
     handlebar_config:set_global(Flag, Value).
 
+set_global_var(Options, Var) ->
+    Value = case proplists:get_value(Var, Options, undefined) of
+                undefined ->
+                    handlebar_config:get_global(Var,[]);
+                V -> V
+            end,
+    handlebar_config:set_global(Var, Value).
+
+
+
 
 
 
@@ -102,6 +119,7 @@ option_spec_list() ->
      {version,  $V, "version",  undefined, "Show version information"},
      {verbose,  $v, "verbose",  undefined, "Be verbose about what gets done"},
      {force,    $f, "force",    undefined, "Force"},
+     {recurse, $r, "recurse", undefined, "Recurse into directories"},
      {template_ext, $e, "template_ext", string, "Extension of the template file(s)"},
      {vars_ext, $E, "vars_ext", string, "Extension of the vars file(s)"},
      {outdir, $d, "outdir", string, "Output directory"},

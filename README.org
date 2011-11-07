@@ -1,0 +1,106 @@
+* Handlebar for Mustache
+
+A command line app for [[https://github.com/mojombo/mustache.erl][mustache.erl]].
+
+I wanted a simple command line tool to process mustache
+templates. Since I use rebar I already had app.config as a mustache
+template and a vars file. However, after generating a release I could
+find no easy way to regenerate the app.config from a different vars
+file without regenerating the entire release.
+
+Using handlebar I can now generate app.config files for new installs
+of erlang apps.
+
+** Installation
+   To compile the code you will need [[https://github.com/basho/rebar/][rebar]] in your path. Then do:
+   #+begin_src sh
+   make
+   #+end_src
+
+   This will produce a escript file named handlebar. Put this in your
+   path.
+
+** Usage
+
+   handlebar finds files by optionally recursively walking directories
+   and determines what do with the files based on extension. It needs
+   at least one variable file and one tempalate file in order to do
+   anything.
+
+   The following will load one.vars as a variable file and once.src as
+   a mustache template, the result of processing the template will be
+   written to stdout
+   #+begin_src sh
+     handlebar examples/one.vars examples/one.src
+   #+end_src
+
+   The following will load one.vars as a variable file and once.src as
+   a mustache template, the result of processing the template will be
+   written to the file one.file
+   #+begin_src sh
+     handlebar examples/one.vars examples/one.src -o one.file
+   #+end_src
+
+
+   handlebar does not need files to be explicitly specified. It will
+   find all *.vars and *.src in the current directory, process all the
+   .src files and output the result to stdout
+   #+begin_src sh
+     cd examples && handlebar
+   #+end_src
+
+   If an output directory is specified using the -d parameter, then
+   all templates handlebar processes will be written to the directory
+   with the .src extension removed. The following will result in
+   out/one, out/two since there is a one.src and a two.src in the
+   examples dir.
+
+   #+begin_src sh
+     cd examples && handlebar  -d ../out
+   #+end_src
+
+
+   The key to understanding the behaviour of handlebar is that it
+   recursively walks the paths provided as arguments (even if the path
+   is a file, the file will just be loaded). Any variable file that is
+   found is parsed with file:consult/1 and the resulting proplists are
+   appended together. Any template file that is found is rendered
+   through mustache:render/2 and all output is sent to stdout, a file
+   or a directory.
+
+
+
+
+
+*** variable files
+   A variable file is the file which lists the variables and their
+   values in erlang syntax. It must be readable by =file:consult/1=
+   #+begin_src erlang
+     {one, 1}.
+     {two, 2}.
+     {a_word, "forty two"}.
+   #+end_src
+
+   The default extension for a variable file is *.vars*. The default
+   extension can be changed by specifying the -E parameter.
+
+*** template files
+    A template file is a mustache template. See [[https://github.com/mojombo/mustache.erl][mustache.erl]] for details.
+
+    The default extension is *.src*. The default extension can be
+    changed by specifying the -e parameter.
+
+*** output
+
+    By default all output is sent to *stdout*. This can be changed to
+    either a directory or a file.
+
+    To change the output to a file specify the -o parameter
+
+    To change the output to a directory specify the -d parameter
+
+** TODO
+
+   Outside of bugs, I consider this to be relatively feature
+   complete. Please let me know of anything I may have overlooked.
+
