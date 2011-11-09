@@ -56,6 +56,8 @@ parse_args(Args) ->
             set_global_var(Options, vars_ext),
             set_global_var(Options, outdir),
             set_global_var(Options, outfile),
+            set_global_var(Options, anchor),
+            set_global_var(Options, navigate),
 
             NonOptArgs;
 
@@ -90,7 +92,7 @@ set_global_flag(Options, Flag) ->
 set_global_var(Options, Var) ->
     Value = case proplists:get_value(Var, Options, undefined) of
                 undefined ->
-                    handlebar_config:get_global(Var,[]);
+                    handlebar_config:get_global(Var,undefined);
                 V -> V
             end,
     handlebar_config:set_global(Var, Value).
@@ -123,5 +125,7 @@ option_spec_list() ->
      {template_ext, $e, "template_ext", string, "Extension of the template file(s)"},
      {vars_ext, $E, "vars_ext", string, "Extension of the vars file(s)"},
      {outdir, $d, "outdir", string, "Output directory"},
-     {outfile, $o, "outfile", string, "Output File, defaults to stdout"}
+     {outfile, $o, "outfile", string, "Output File, defaults to stdout"},
+     {anchor, $a, "anchor", string, "Directory to start all other path operations on, defaults to cwd"},
+     {navigate, $n, "nagivate", string, "Walk the dir path(s): tree, path, term, see README"}
     ].
