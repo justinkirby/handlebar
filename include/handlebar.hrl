@@ -1,6 +1,6 @@
 -define(FAIL, throw({error, failed})).
 
--define(ABORT(Str, Args), handlebar_utils:abort(Str, Args)).
+-define(ABORT(Str, Args), handlebar:abort(Str, Args)).
 
 -define(CONSOLE(Str, Args), io:format(Str, Args)).
 
