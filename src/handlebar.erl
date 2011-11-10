@@ -121,7 +121,7 @@ option_spec_list() ->
      {version,  $V, "version",  undefined, "Show version information"},
      {verbose,  $v, "verbose",  undefined, "Be verbose about what gets done"},
      {force,    $f, "force",    undefined, "Force"},
-     {recurse, $r, "recurse", undefined, "Recurse into directories"},
+     {recurse, $r, "recurse",   undefined, "Recurse into directories"},
      {template_ext, $e, "template_ext", string, "Extension of the template file(s)"},
      {vars_ext, $E, "vars_ext", string, "Extension of the vars file(s)"},
      {outdir, $d, "outdir", string, "Output directory"},
