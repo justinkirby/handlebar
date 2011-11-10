@@ -50,7 +50,10 @@ render_templates([T|Ts], Ctx) ->
         {error, Reason} ->
             ?ERROR("Failed to open template, ~p, ~p~n",[T,Reason]);
         {ok, Data} ->
-            Output = mustache:render(binary_to_list(Data), Ctx),
+            ReOpts = [global, {return, list}],
+            Str0 = re:replace(Data, "\\\\", "\\\\\\", ReOpts),
+            Str1 = re:replace(Str0, "\"", "\\\\\"", ReOpts),
+            Output = mustache:render(Str1, Ctx),
             handlebar_out:output(T,Output)
     end,
     render_templates(Ts, Ctx).
