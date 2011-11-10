@@ -5,6 +5,7 @@
          ]).
 
 -include("handlebar.hrl").
+
 process([]) ->
     process(["."]);
 process(FilesDirs) ->
@@ -26,7 +27,8 @@ process(FilesDirs) ->
 
 
 
-build_context([],Acc) -> Acc;
+build_context([],Acc) ->
+    add_define(Acc);
 
 build_context([V|Vs], Acc) ->
     case file:consult(V) of
@@ -52,3 +54,57 @@ render_templates([T|Ts], Ctx) ->
             handlebar_out:output(T,Output)
     end,
     render_templates(Ts, Ctx).
+
+add_define(Ctx) ->
+
+    case handlebar_config:get_global(define, undefined) of
+        undefined ->
+            Ctx;
+        Str ->
+            Proplist = case consult(Str) of
+                           Terms when length(Terms) > 0,
+                                      is_tuple(hd(Terms)) ->
+                               %% a simple {,,,}. was passed in, leave
+                               %% alone since this is a proplist
+                               Terms;
+                           Terms when length(Terms) == 1,
+                                      is_list(hd(Terms)) ->
+                               %% a proplist was passed in as define,
+                               %% it is now a single element list, pop
+                               %% it and returne the proplist
+                               hd(Terms);
+                           Terms ->
+                               %% no idea wtf this is!
+                               ?ABORT("~p is not a {Key,Value} tuple or proplist!~n",[Terms])
+                       end,
+            lists:foldl(fun({Key,Value}, D) ->
+                                dict:store(Key, Value, D)
+                        end, Ctx, Proplist)
+    end.
+
+
+
+
+%%
+%% Given a string or binary, parse it into a list of terms, ala file:consult/0
+%%
+consult(Str) when is_list(Str) ->
+    consult([], Str, []);
+consult(Bin) when is_binary(Bin)->
+    consult([], binary_to_list(Bin), []).
+
+consult(Cont, Str, Acc) ->
+    case erl_scan:tokens(Cont, Str, 0) of
+        {done, Result, Remaining} ->
+            case Result of
+                {ok, Tokens, _} ->
+                    {ok, Term} = erl_parse:parse_term(Tokens),
+                    consult([], Remaining, [Term | Acc]);
+                {eof, _Other} ->
+                    lists:reverse(Acc);
+                {error, Info, _} ->
+                    {error, Info}
+            end;
+        {more, Cont1} ->
+            consult(Cont1, eof, Acc)
+    end.
