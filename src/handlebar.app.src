@@ -2,7 +2,7 @@
 {application, handlebar,
  [
   {description, "CLI for Mustache "},
-  {vsn, git},
+  {vsn, "0.1.0.201111101635"},
   {applications,
    [ kernel,
      stdlib,
