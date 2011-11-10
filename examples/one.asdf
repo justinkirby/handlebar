@@ -1,0 +1,5 @@
+{eulers_number, "e"}.
+{imaginary, "i"}.
+{pie, "pi"}.
+{one, "1"}.
+{zero, "0"}.

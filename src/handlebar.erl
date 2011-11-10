@@ -5,7 +5,8 @@
 
 
 -export([
-         main/1
+         main/1,
+         abort/2
         ]).
 
 
@@ -56,6 +57,9 @@ parse_args(Args) ->
             set_global_var(Options, vars_ext),
             set_global_var(Options, outdir),
             set_global_var(Options, outfile),
+            set_global_var(Options, anchor),
+            set_global_var(Options, navigate),
+            set_global_var(Options, define),
 
             NonOptArgs;
 
@@ -90,7 +94,7 @@ set_global_flag(Options, Flag) ->
 set_global_var(Options, Var) ->
     Value = case proplists:get_value(Var, Options, undefined) of
                 undefined ->
-                    handlebar_config:get_global(Var,[]);
+                    handlebar_config:get_global(Var,undefined);
                 V -> V
             end,
     handlebar_config:set_global(Var, Value).
@@ -103,9 +107,8 @@ set_global_var(Options, Var) ->
 help() ->
     OptSpecList = option_spec_list(),
     getopt:usage(OptSpecList, "handlebar",
-                 "[var=value,...] <command,...>",
-                 [{"var=value", "handlebar global variabes (e.g. ext=foo)"},
-                  {"files", "List of files to consume"}]).
+                 "path(s)",
+                 [{"path(s)", "List of paths to consume"}]).
 
 
 version() ->
@@ -119,9 +122,20 @@ option_spec_list() ->
      {version,  $V, "version",  undefined, "Show version information"},
      {verbose,  $v, "verbose",  undefined, "Be verbose about what gets done"},
      {force,    $f, "force",    undefined, "Force"},
-     {recurse, $r, "recurse", undefined, "Recurse into directories"},
-     {template_ext, $e, "template_ext", string, "Extension of the template file(s)"},
-     {vars_ext, $E, "vars_ext", string, "Extension of the vars file(s)"},
+     {recurse, $r, "recurse",   undefined, "Recurse into directories"},
+     {template_ext, $e, "template_ext", string, "Extension of the template file(s), defaults to 'src'"},
+     {vars_ext, $E, "vars_ext", string, "Extension of the vars file(s), defaults to 'vars'"},
      {outdir, $d, "outdir", string, "Output directory"},
-     {outfile, $o, "outfile", string, "Output File, defaults to stdout"}
+     {outfile, $o, "outfile", string, "Output File, defaults to stdout"},
+     {anchor, $a, "anchor", string, "Directory to start all other path operations on, defaults to cwd"},
+     {navigate, $n, "nagivate", string, "Walk the dir path(s): tree, path, term, see README"},
+     {define, $d, "define", string, "tuple or proplists that overrides any variable."}
     ].
+
+
+%%this should be in utils.erl, but it does not exist yet... not
+%%creating it for this one func
+-spec abort(string(), [term()]) -> no_return().
+abort(String, Args) ->
+    ?ERROR(String, Args),
+    halt(1).

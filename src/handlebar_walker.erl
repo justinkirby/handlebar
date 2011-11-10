@@ -6,78 +6,123 @@
 
 -include("handlebar.hrl").
 
-
 walk(Path) ->
     Var = handlebar_config:get_global(vars_ext,"vars"),
     Tmp = handlebar_config:get_global(template_ext, "src"),
+    Recurse = case handlebar_config:get_global(recurse, "0") of
+                  "0" -> false;
+                  _ -> true
+              end,
 
+    Anchor = case handlebar_config:get_global(anchor) of
+                 undefined ->
+                     {ok, Dir} = file:get_cwd(),
+                     Dir;
+                 Dir -> Dir
+             end,
 
-    Data = extract_from_path(Path, Var, Tmp),
-
-    case handlebar_config:get_global(recurse,"0") of
-        "0" -> Data;
-        "1" ->
-            Dirs = proplists:get_all_values(dir,Data),
-            Data0 = proplists:delete(dir,Data),
-            walk(Dirs, Var, Tmp, Data0)
-    end.
-
-
-
-walk([], _Var, _Tmp, Acc) -> Acc;
-
-walk([SubDir|Dirs], Var, Tmp, Acc) ->
-    Acc0 = extract_from_path(SubDir, Var, Tmp, Acc),
-    Subs = proplists:get_all_values(dir, Acc0),
-    Acc1 = proplists:delete(dir, Acc0),
-    Acc2 = walk(Subs, Var, Tmp, Acc1),
-    walk(Dirs, Var, Tmp, Acc2).
-
-
-
-
-extract_from_path(Path, Var, Tmp) ->
-    extract_from_path(Path, Var, Tmp, []).
-extract_from_path(Path, Var, Tmp, Data) ->
-    case filelib:is_dir(Path) of
-        false ->
-            DataVar = if_match_add(Path, var, Var, Data),
-            if_match_add(Path, template, Tmp, DataVar);
+    case filelib:is_regular(filename:join(Anchor,Path)) of
         true ->
-            {ok, Paths} = file:list_dir(Path),
-            SubPaths = [filename:join(Path,P) || P <- Paths],
-            cat_paths(SubPaths, Var, Tmp, Data)
-    end.
-
-
-
-cat_paths([], _Var,_Tmp, Acc) ->
-    Acc;
-cat_paths([P|Ps], Var, Tmp, Data) ->
-    Dirs = if_isdir_add(P,Data),
-    Vars = if_match_add(P, var, Var, Dirs),
-    Tmps = if_match_add(P, template, Tmp, Vars),
-    cat_paths(Ps, Var, Tmp, Tmps).
-
-
-
-
-if_isdir_add(Path,Dirs) ->
-    case filelib:is_dir(Path) of
+            handle_file(filename:join(Anchor, Path), Var, Tmp);
         false ->
-            Dirs;
-        true ->
-            [{dir,Path}|Dirs]
+            handle_dir(Anchor, Path, Var, Tmp, Recurse)
     end.
 
-if_match_add(Path, Key, Ext, Vars) ->
-    case match_ext(Path,Ext) of
-        false ->
-            Vars;
-        true ->
-            [{Key,Path}|Vars]
+handle_file(Path, Var, Tmp) ->
+    ?DEBUG("~p ~p~n",[handle_file, Path]),
+
+    VarExt = [$.|Var],
+    TmpExt = [$.|Tmp],
+    case filename:extension(Path) of
+        VarExt ->
+            dict:from_list([{var,[Path]},{template,[]}]);
+        TmpExt ->
+            dict:from_list([{var,[]},{template,[Path]}]);
+        _ ->
+            dict:from_list([{var,[]},{template,[]}])
     end.
 
 
-match_ext(Path, Ext) ->
-    filename:extension(Path) == [$.|Ext].
+handle_dir(Anchor, Path, Var, Tmp, Recurse) ->
+    ?DEBUG("~p ~p/~p:~p~n",[handle_dir, Anchor, Path,Recurse]),
+
+
+    %% what style of nav is specified?
+    %% - tree
+    %% - branch
+    %% - term
+
+    case handlebar_config:get_global(navigate,"tree") of
+        "tree" ->
+            RootedPath = filename:join(Anchor, Path),
+            tree_walk(RootedPath, Var, Tmp, Recurse);
+        "branch" ->
+            branch_walk(Anchor, Path, Var, Tmp)
+    end.
+
+tree_walk(Path, Var, Tmp, Recurse) ->
+
+    %% instead of doing diff extensions, could also do a single regex
+    %% of ".*\\.(Var|Tmp)$" and then have a complicated accumulator
+    %% fun to create a dict of var and template
+    %% paths... ick... dealing with inefficiency of multiple dir walks
+    %% for simpler code.
+    VarRe = ".*\\."++Var++"$",
+    TmpRe = ".*\\."++Tmp++"$",
+    Vars = filelib:fold_files(Path, VarRe, Recurse,
+                              fun(F,A) -> [F|A] end,
+                              []),
+    Tmps = filelib:fold_files(Path, TmpRe, Recurse,
+                              fun(F,A) -> [F|A] end,
+                              []),
+
+    %%see comment on sort filename
+    VarsSort = lists:sort(fun sort_filename/2, Vars),
+    TmpsSort = lists:sort(fun sort_filename/2, Tmps),
+
+    dict:from_list([{var, VarsSort},{template, TmpsSort}]).
+
+branch_walk(Anchor, Path, Var, Tmp) ->
+
+    Paths = branch_paths(Anchor, string:tokens(Path,"/"),[]),
+
+    %% loop over the paths in order and do a nonrecursive tree
+    %% walk... then we sort on final result... man this is getting
+    %% really inefficient. I hope no one uses this in performance
+    %% critical paths
+    lists:foldl(fun(P, D) ->
+                        Walked = tree_walk(P, Var, Tmp, false),
+                        dict:merge(fun(_,A,B) -> A++B end,
+                                   D,Walked)
+                end,
+                dict:new(), Paths).
+
+
+
+%% turn /a/b, x/y/z to [/a/b/x, /a/b/x/y, /a/b/x/y/z]
+branch_paths(_Anchor, [], Acc) -> lists:reverse(Acc);
+branch_paths(Anchor, [P|Path], Acc) ->
+    New = filename:join(Anchor, P),
+    branch_paths(New, Path, [New|Acc]).
+
+
+%% this is to solve the mis order of /a/a/a.foo and /a/b.foo normal
+%% alpha sort would put them in that order, we really want /a/b.foo
+%% then /a/a/a.foo This fits more with the 'directory sort' intuition
+%% (at least my intuition)
+sort_filename(A,B) ->
+    %% if the dir is == then compare filename
+    %% otherwise use the dirname
+    Adir = filename:dirname(A),
+    Bdir = filename:dirname(B),
+    case Adir of
+        Bdir ->
+            %% they are the same, compare filenames
+            filename:basename(A) =< filename:basename(B);
+        _ ->
+            %% dirs are not the same, then use the dir to compare
+            Adir =< Bdir
+    end.
+
+
+

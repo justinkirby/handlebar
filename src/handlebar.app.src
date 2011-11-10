@@ -22,7 +22,8 @@
          {template_ext, "src"},
          {vars_ext, "vars"},
          {outdir,  undefined},
-         {outfile, undefined}
+         {outfile, undefined},
+         {navigate, "tree"}
  ] },
   {mods,[]}
 
