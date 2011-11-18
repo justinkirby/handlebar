@@ -24,7 +24,7 @@ output(Template, Data) ->
             case handlebar_config:get_global(outfile, undefined) of
                 undefined ->
                     %% nothing specified, dump straight to stdout
-                    io:format(Data);
+                    file:write(standard_io, Data);
                 File ->
                     output_file(File, Data)
             end;
