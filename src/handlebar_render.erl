@@ -33,7 +33,7 @@ build_context([],Acc) ->
 build_context([V|Vs], Acc) ->
     case file:consult(V) of
         {error, Reason} ->
-            io:format("Failed to consult ~p, ~p~n",[V,Reason]),
+            io:format(standard_error,"Failed to consult ~p, ~p~n",[V,Reason]),
             build_context(Vs, Acc);
         {ok, Terms} ->
             New = lists:foldl(fun({Key,Value}, D) ->

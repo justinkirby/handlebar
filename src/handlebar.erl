@@ -20,7 +20,7 @@ main(Args) ->
         {error, failed} ->
             halt(1);
         Error ->
-            io:format("Uncaught error: ~p~n",[Error]),
+            io:format(standard_error, "Uncaught error: ~p~n",[Error]),
             halt(1)
     end.
 
@@ -64,7 +64,7 @@ parse_args(Args) ->
             NonOptArgs;
 
         {error, {Reason, Data}} ->
-            io:format("Error: ~s ~p~n~n", [Reason, Data]),
+            io:format(standard_error,"Error: ~s ~p~n~n", [Reason, Data]),
             help(),
             halt(1)
     end.
