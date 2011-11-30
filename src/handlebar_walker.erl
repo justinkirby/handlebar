@@ -16,8 +16,15 @@ walk(Path) ->
 
     Anchor = case handlebar_config:get_global(anchor) of
                  undefined ->
-                     {ok, Dir} = file:get_cwd(),
-                     Dir;
+                     %% we set the anchor to something if and only if
+                     %% the paths are relative., i.e. the first char
+                     %% of the path is /
+                     case hd(Path) of
+                         $/ -> [];
+                         _ ->
+                             {ok, Dir} = file:get_cwd(),
+                             Dir
+                     end;
                  Dir -> Dir
              end,
 
@@ -57,7 +64,9 @@ handle_dir(Anchor, Path, Var, Tmp, Recurse) ->
             RootedPath = filename:join(Anchor, Path),
             tree_walk(RootedPath, Var, Tmp, Recurse);
         "branch" ->
-            branch_walk(Anchor, Path, Var, Tmp)
+            branch_walk(Anchor, Path, Var, Tmp);
+        N  ->
+            ?ABORT("~p is an invalid walking method, see help~n",[N])
     end.
 
 tree_walk(Path, Var, Tmp, Recurse) ->
