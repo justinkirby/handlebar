@@ -128,7 +128,7 @@ option_spec_list() ->
      {outdir, $d, "outdir", string, "Output directory"},
      {outfile, $o, "outfile", string, "Output File, defaults to stdout"},
      {anchor, $a, "anchor", string, "Directory to start all other path operations on, defaults to cwd"},
-     {navigate, $n, "nagivate", string, "Walk the dir path(s): tree, path, term, see README"},
+     {navigate, $n, "nagivate", string, "Walk the dir path(s): tree, branch, see README"},
      {define, $d, "define", string, "tuple or proplists that overrides any variable."}
     ].
 
