@@ -93,13 +93,14 @@ tree_walk(Path, Var, Tmp, Recurse) ->
 
 branch_walk(Anchor, Path, Var, Tmp) ->
 
-    Paths = branch_paths(Anchor, string:tokens(Path,"/"),[]),
+    Paths = [Anchor|branch_paths(Anchor, string:tokens(Path,"/"),[])],
 
     %% loop over the paths in order and do a nonrecursive tree
     %% walk... then we sort on final result... man this is getting
     %% really inefficient. I hope no one uses this in performance
     %% critical paths
     lists:foldl(fun(P, D) ->
+                        ?DEBUG("walking: ~s~n",[P]),
                         Walked = tree_walk(P, Var, Tmp, false),
                         dict:merge(fun(_,A,B) -> A++B end,
                                    D,Walked)
