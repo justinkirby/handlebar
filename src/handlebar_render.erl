@@ -137,4 +137,4 @@ mustachize(Data, Ctx) ->
     ReOpts = [global, {return, list}],
     Str0 = re:replace(Data, "\\\\", "\\\\\\", ReOpts),
     Str1 = re:replace(Str0, "\"", "\\\\\"", ReOpts),
-     mustache:render(Str1, Ctx).
+    mustache:render(Str1, Ctx).
