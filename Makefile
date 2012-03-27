@@ -1,4 +1,3 @@
-
 all: compile
 
 compile: deps
@@ -7,3 +6,9 @@ compile: deps
 
 deps:
 	rebar get-deps
+
+docs:
+	$(EMACS) -q -batch -l docs/publish.el --eval='(handlebar-publish)'
+
+
+.PHONY: docs

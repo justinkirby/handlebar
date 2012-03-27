@@ -9,7 +9,7 @@
   (setq org-publish-project-alist
         '(
           ("handlebar"
-           :publishing-directory "html"
+           :publishing-directory "."
            :base-directory "."
            :recursive t
            :publishing-function org-publish-org-to-html
