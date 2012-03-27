@@ -6,7 +6,7 @@ if test ! -x "handlebar"; then
 fi
 
 
-mkdir tmp
+mkdir -p tmp
 
 ./handlebar examples/one.src examples/one.vars > tmp/foobar
 ./handlebar examples/ -d tmp/foo

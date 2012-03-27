@@ -1,0 +1,510 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+               "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+lang="en" xml:lang="en">
+<head>
+<title>README</title>
+<meta http-equiv="Content-Type" content="text/html;charset=iso-8859-1"/>
+<meta name="generator" content="Org-mode"/>
+<meta name="generated" content="2012-03-26 20:14:32 EDT"/>
+<meta name="author" content=""/>
+<meta name="description" content=""/>
+<meta name="keywords" content=""/>
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  html { font-family: Times, serif; font-size: 12pt; }
+  .title  { text-align: center; }
+  .todo   { color: red; }
+  .done   { color: green; }
+  .tag    { background-color: #add8e6; font-weight:normal }
+  .target { }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .right  {margin-left:auto; margin-right:0px;  text-align:right;}
+  .left   {margin-left:0px;  margin-right:auto; text-align:left;}
+  .center {margin-left:auto; margin-right:auto; text-align:center;}
+  p.verse { margin-left: 3% }
+  pre {
+	border: 1pt solid #AEBDCC;
+	background-color: #F3F5F7;
+	padding: 5pt;
+	font-family: courier, monospace;
+        font-size: 90%;
+        overflow:auto;
+  }
+  table { border-collapse: collapse; }
+  td, th { vertical-align: top;  }
+  th.right  { text-align:center;  }
+  th.left   { text-align:center;   }
+  th.center { text-align:center; }
+  td.right  { text-align:right;  }
+  td.left   { text-align:left;   }
+  td.center { text-align:center; }
+  dt { font-weight: bold; }
+  div.figure { padding: 0.5em; }
+  div.figure p { text-align: center; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size:smaller }
+  .code-highlighted {background-color:#ffff00;}
+  .org-info-js_info-navigation { border-style:none; }
+  #org-info-js_console-label { font-size:10px; font-weight:bold;
+                               white-space:nowrap; }
+  .org-info-js_search-highlight {background-color:#ffff00; color:#000000;
+                                 font-weight:bold; }
+  /*]]>*/-->
+</style>
+<script type="text/javascript">
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+
+</head>
+<body>
+<div id="content">
+
+<h1 class="title">README</h1>
+
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#sec-1">1 Handlebar for Mustache </a>
+<ul>
+<li><a href="#sec-1_1">1.1 Installation </a></li>
+<li><a href="#sec-1_2">1.2 Usage </a>
+<ul>
+<li><a href="#sec-1_2_1">1.2.1 variable files </a></li>
+<li><a href="#sec-1_2_2">1.2.2 extra template files </a></li>
+<li><a href="#sec-1_2_3">1.2.3 template files </a></li>
+<li><a href="#sec-1_2_4">1.2.4 output </a></li>
+</ul></li>
+</ul>
+</li>
+<li><a href="#sec-2">2 Examples </a>
+<ul>
+<li><a href="#sec-2_1">2.1 Rules </a></li>
+<li><a href="#sec-2_2">2.2 </a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-1" class="outline-2">
+<h2 id="sec-1"><span class="section-number-2">1</span> Handlebar for Mustache </h2>
+<div class="outline-text-2" id="text-1">
+
+
+<p>
+A command line app for <a href="https://github.com/mojombo/mustache.erl">mustache.erl</a>.
+</p>
+<p>
+I wanted a simple command line tool to process mustache
+templates. Since I use rebar I already had sys.config as a mustache
+template and a vars file. However, after generating a release I could
+find no easy way to regenerate the sys.config from a different vars
+file without regenerating the entire release.
+</p>
+<p>
+Using handlebar I can now generate sys.config files for new installs
+of erlang releases without having to regenerate the release.
+</p>
+
+</div>
+
+<div id="outline-container-1_1" class="outline-3">
+<h3 id="sec-1_1"><span class="section-number-3">1.1</span> Installation </h3>
+<div class="outline-text-3" id="text-1_1">
+
+<p>   To compile the code you will need <a href="https://github.com/basho/rebar/">rebar</a> in your path. Then do:
+</p>
+
+
+<pre class="src src-sh">make
+</pre>
+
+
+
+<p>
+   This will produce a escript file named handlebar. Put this in your
+   path.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-1_2" class="outline-3">
+<h3 id="sec-1_2"><span class="section-number-3">1.2</span> Usage </h3>
+<div class="outline-text-3" id="text-1_2">
+
+
+<p>
+   handlebar finds files by optionally recursively (-r) walking directories
+   and determines what do with the files based on extension. It needs
+   at least one variable file and one tempalate file in order to do
+   anything.
+</p>
+<p>
+   The following will load one.vars as a variable file and one.src as
+   a mustache template, the result of processing the template will be
+   written to stdout
+</p>
+
+
+<pre class="src src-sh">handlebar examples/one.vars examples/one.src
+</pre>
+
+
+
+<p>
+   The following will load one.vars as a variable file and once.src as
+   a mustache template, the result of processing the template will be
+   written to the file one.file
+</p>
+
+
+<pre class="src src-sh">handlebar examples/one.vars examples/one.src -o one.file
+</pre>
+
+
+
+
+<p>
+   handlebar does not need files to be explicitly specified. It will
+   find all *.vars and *.src in the current directory, process all the
+   .src files and output the result to stdout
+</p>
+
+
+<pre class="src src-sh"><span style="color: #729fcf;">cd</span> examples &amp;&amp; handlebar
+</pre>
+
+
+
+<p>
+   If an output directory is specified using the -d parameter, then
+   all templates handlebar processes will be written to the directory
+   with the .src extension removed. The following will result in
+   out/one, out/two since there is a one.src and a two.src in the
+   examples dir.
+</p>
+
+
+
+<pre class="src src-sh"><span style="color: #729fcf;">cd</span> examples &amp;&amp; handlebar  -d ../out
+</pre>
+
+
+
+
+<p>
+   The key to understanding the behaviour of handlebar is that it
+   recursively walks the paths provided as arguments (even if the path
+   is a file, the file will just be loaded). Any variable file that is
+   found is parsed with <a href="consult/1">consult/1</a> and the resulting proplists are
+   appended together. Any template file that is found is rendered
+   through mustache:render/2 and all output is sent to stdout, a file
+   or a directory.
+</p>
+
+
+
+
+
+</div>
+
+<div id="outline-container-1_2_1" class="outline-4">
+<h4 id="sec-1_2_1"><span class="section-number-4">1.2.1</span> variable files </h4>
+<div class="outline-text-4" id="text-1_2_1">
+
+<p>   A variable file is the file which lists the variables and their
+   values in erlang syntax. It must be readable by <code>file:consult/1</code>
+</p>
+
+
+<pre class="src src-erlang">{one, 1}.
+{two, 2}.
+{a_word, <span style="color: #ad7fa8;">"forty two"</span>}.
+</pre>
+
+
+
+<p>
+   The default extension for a variable file is <b>.vars</b>. The default
+   extension can be changed by specifying the -E parameter.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-1_2_2" class="outline-4">
+<h4 id="sec-1_2_2"><span class="section-number-4">1.2.2</span> extra template files </h4>
+<div class="outline-text-4" id="text-1_2_2">
+
+<p>    A xtr file is a combination fo variable and template file. It is
+    treated as a template file, however, the result of the template
+    processing is stored in the context dictionary, NOT sent to
+    output. This means that a xtr file named fruits.xtr will become
+    {fruits, "content of post template processing of xtr contents"}.
+</p>
+
+
+</div>
+
+</div>
+
+<div id="outline-container-1_2_3" class="outline-4">
+<h4 id="sec-1_2_3"><span class="section-number-4">1.2.3</span> template files </h4>
+<div class="outline-text-4" id="text-1_2_3">
+
+<p>    A template file is a mustache template. See <a href="https://github.com/mojombo/mustache.erl">mustache.erl</a> for details.
+</p>
+<p>
+    The default extension is <b>.src</b>. The default extension can be
+    changed by specifying the -e parameter.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-1_2_4" class="outline-4">
+<h4 id="sec-1_2_4"><span class="section-number-4">1.2.4</span> output </h4>
+<div class="outline-text-4" id="text-1_2_4">
+
+
+<p>
+    By default all output is sent to <b>stdout</b>. This can be changed to
+    either a directory or a file.
+</p>
+<p>
+    To change the output to a file specify the -o parameter
+</p>
+<p>
+    To change the output to a directory specify the -d parameter
+</p>
+
+</div>
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-2" class="outline-2">
+<h2 id="sec-2"><span class="section-number-2">2</span> Examples </h2>
+<div class="outline-text-2" id="text-2">
+
+
+<p>
+  Lets assume the following directory structure:
+</p><ul>
+<li>fruits
+<ul>
+<li>trees
+<ul>
+<li>apples.vars
+</li>
+<li>peaches.vars
+</li>
+</ul>
+</li>
+<li>bush
+<ul>
+<li>blueberry.vars
+</li>
+</ul>
+</li>
+<li>fruits.xtr
+</li>
+</ul>
+</li>
+<li>vegetables
+<ul>
+<li>root.vars
+</li>
+<li>leaf.vars
+</li>
+<li>vegetables.xtr
+</li>
+</ul>
+</li>
+<li>foods.src
+</li>
+</ul>
+
+<p>
+  We can further make some assertions about the content of the files in general, there will always be a best, worst and all. example of apples.var
+</p>
+
+
+<pre class="src src-erlang">{best, <span style="color: #ad7fa8;">"Honeycrisp"</span>}.
+{worst, <span style="color: #ad7fa8;">"Red Delicious"</span>}.
+{all, <span style="color: #ad7fa8;">"[\"Empire\", \"Jona Gold\", \"20oz\", \"McCoun\"]"</span>}.
+{apple_favorite, <span style="color: #ad7fa8;">"Honeycrisp"</span>}.
+</pre>
+
+
+
+<p>
+  fruits.xtr
+</p>
+
+
+<pre class="example">There are lots of fruits out there. Of all {{all}}, the best is {{best}} and the worst is {{worst}}.
+</pre>
+
+
+
+<p>
+  foods.src
+</p>
+
+
+<pre class="example">{{fruits}} and {{vegetables}}
+</pre>
+
+
+
+
+</div>
+
+<div id="outline-container-2_1" class="outline-3">
+<h3 id="sec-2_1"><span class="section-number-3">2.1</span> Rules </h3>
+<div class="outline-text-3" id="text-2_1">
+
+<p>   Lets start with the most greedy options. We want handlebar to find
+   all data and process everything under the examples/readme dir.
+</p>
+
+
+
+<pre class="src src-sh"><span style="color: #729fcf;">cd</span> examples/readme &amp;&amp; ../../handlebar -r -n tree
+</pre>
+
+
+
+<pre class="example">
+There are lots of fruits out there. Of all ["Parsnip", "Beets", "Turnips", "Carrots"], the best is Carrot and the worst is Turnips
+ and There are lots of vegetables out there. Of all ["Parsnip", "Beets", "Turnips", "Carrots"], the best is Carrot and the worst is Turnips
+
+
+</pre>
+
+
+<p>
+   Not quite what we wanted to have happen! But close, so what is going on?
+</p>
+<ol>
+<li>handlebar looks for all *.vars files. For each vars file that is
+      found, it is <a href="consult/1">consult/1</a> and inserted into a single
+      dictionary. This means the <b>last</b> vars file found has the
+      highest precedence when resolving variable value conflicts.
+</li>
+<li>Then all *.xtr files. For each of these, it treats as a template
+      using the current context built from the vars files. However,
+      the xtr files are NOT sent to output, the files become variables
+      in the context. So fruits.xtr will become {fruits, "content of
+      file after processing"} in the context dictionary.
+</li>
+<li>Then all *.src files. For each of these mustache is run and the
+      output is sent to specified location.
+</li>
+</ol>
+
+<p>
+   Then how do we resolve the inherent conflict in the above output?
+   Tell handlebar that xtr are templates and process each
+   individually.
+</p>
+<p>
+   Process the xtr as a template by changing the extenions of templates to xtr.
+</p>
+
+
+<pre class="src src-sh"><span style="color: #729fcf;">cd</span> examples/readme &amp;&amp; ../../handlebar -r -n tree -e xtr fruits | tee fruits.xtr
+</pre>
+
+
+
+<pre class="example">
+There are lots of fruits out there. Of all ["Redhaven", "Babygold", "Glo Haven"], the best is Glo Haven and the worst is Harbinger
+</pre>
+
+
+<p>
+   Do the same for vegetables.xtr
+</p>
+
+
+<pre class="src src-sh"><span style="color: #729fcf;">cd</span> examples/readme &amp;&amp; ../../handlebar -r -n tree -e xtr vegetables | tee vegetables.xtr
+</pre>
+
+
+
+<pre class="example">
+There are lots of vegetables out there. Of all ["Parsnip", "Beets", "Turnips", "Carrots"], the best is Carrot and the worst is Turnips
+</pre>
+
+
+<p>
+   We now have fruits.xtr and vegetables.xtr in the root directory and
+   can munge them together into the template as we wanted to earlier.
+</p>
+
+
+<pre class="src src-sh"><span style="color: #729fcf;">cd</span> examples/readme &amp;&amp; ../../handlebar
+</pre>
+
+
+
+<pre class="example">
+There are lots of fruits out there. Of all ["Redhaven", "Babygold", "Glo Haven"], the best is Glo Haven and the worst is Harbinger
+ and There are lots of vegetables out there. Of all ["Parsnip", "Beets", "Turnips", "Carrots"], the best is Carrot and the worst is Turnips
+
+
+</pre>
+
+
+
+</div>
+
+</div>
+
+<div id="outline-container-2_2" class="outline-3">
+<h3 id="sec-2_2"><span class="section-number-3">2.2</span> <span class="todo TODO"> TODO</span>  </h3>
+<div class="outline-text-3" id="text-2_2">
+
+
+<p>
+   Outside of bugs, I consider this to be relatively feature
+   complete. Please let me know of anything I may have overlooked.
+</p>
+</div>
+</div>
+</div>
+<div id="postamble">
+<p class="author">Author: </p>
+<p class="creator">Org version 7.4 with Emacs version 23</p>
+<a href="http://validator.w3.org/check?uri=referer">Validate XHTML 1.0</a>
+</div>
+</div>
+</body>
+</html>

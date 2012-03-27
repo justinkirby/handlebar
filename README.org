@@ -3,13 +3,13 @@
 A command line app for [[https://github.com/mojombo/mustache.erl][mustache.erl]].
 
 I wanted a simple command line tool to process mustache
-templates. Since I use rebar I already had app.config as a mustache
+templates. Since I use rebar I already had sys.config as a mustache
 template and a vars file. However, after generating a release I could
-find no easy way to regenerate the app.config from a different vars
+find no easy way to regenerate the sys.config from a different vars
 file without regenerating the entire release.
 
-Using handlebar I can now generate app.config files for new installs
-of Erlang apps.
+Using handlebar I can now generate sys.config files for new installs
+of erlang releases without having to regenerate the release.
 
 ** Installation
    To compile the code you will need [[https://github.com/basho/rebar/][rebar]] in your path. Then do:
@@ -22,12 +22,12 @@ of Erlang apps.
 
 ** Usage
 
-   handlebar finds files by optionally recursively walking directories
+   handlebar finds files by optionally recursively (-r) walking directories
    and determines what do with the files based on extension. It needs
    at least one variable file and one template file in order to do
    anything.
 
-   The following will load one.vars as a variable file and once.src as
+   The following will load one.vars as a variable file and one.src as
    a mustache template, the result of processing the template will be
    written to stdout
    #+begin_src sh
@@ -84,6 +84,15 @@ of Erlang apps.
    The default extension for a variable file is *.vars*. The default
    extension can be changed by specifying the -E parameter.
 
+*** extra template files
+    A xtr file is a combination fo variable and template file. It is
+    treated as a template file, however, the result of the template
+    processing is stored in the context dictionary, NOT sent to
+    output. This means that a xtr file named fruits.xtr will become
+    {fruits, "content of post template processing of xtr contents"}.
+
+
+
 *** template files
     A template file is a mustache template. See [[https://github.com/mojombo/mustache.erl][mustache.erl]] for details.
 
@@ -98,6 +107,100 @@ of Erlang apps.
     To change the output to a file specify the -o parameter
 
     To change the output to a directory specify the -d parameter
+
+
+* Examples
+
+  Lets assume the following directory structure:
+  - fruits
+    - trees
+      - apples.vars
+      - peaches.vars
+    - bush
+      - blueberry.vars
+    - fruits.xtr
+  - vegetables
+    - root.vars
+    - leaf.vars
+    - vegetables.xtr
+  - foods.src
+
+  We can further make some assertions about the content of the files in general, there will always be a best, worst and all. example of apples.var
+  #+begin_src erlang
+    {best, "Honeycrisp"}.
+    {worst, "Red Delicious"}.
+    {all, "[\"Empire\", \"Jona Gold\", \"20oz\", \"McCoun\"]"}.
+    {apple_favorite, "Honeycrisp"}.
+  #+end_src
+
+  fruits.xtr
+  #+begin_example
+    There are lots of fruits out there. Of all {{all}}, the best is {{best}} and the worst is {{worst}}.
+  #+end_example
+
+  foods.src
+  #+begin_example
+    {{fruits}} and {{vegetables}}
+  #+end_example
+
+** Rules
+   Lets start with the most greedy options. We want handlebar to find
+   all data and process everything under the examples/readme dir.
+
+#+begin_src sh :exports both :results output
+cd examples/readme && ../../handlebar -r -n tree
+#+end_src
+
+#+results:
+: There are lots of fruits out there. Of all ["Parsnip", "Beets", "Turnips", "Carrots"], the best is Carrot and the worst is Turnips
+:  and There are lots of vegetables out there. Of all ["Parsnip", "Beets", "Turnips", "Carrots"], the best is Carrot and the worst is Turnips
+:
+
+   Not quite what we wanted to have happen! But close, so what is going on?
+
+   1. handlebar looks for all *.vars files. For each vars file that is
+      found, it is file:consult/1 and inserted into a single
+      dictionary. This means the *last* vars file found has the
+      highest precedence when resolving variable value conflicts.
+   2. Then all *.xtr files. For each of these, it treats as a template
+      using the current context built from the vars files. However,
+      the xtr files are NOT sent to output, the files become variables
+      in the context. So fruits.xtr will become {fruits, "content of
+      file after processing"} in the context dictionary.
+   3. Then all *.src files. For each of these mustache is run and the
+      output is sent to specified location.
+
+   Then how do we resolve the inherent conflict in the above output?
+   Tell handlebar that xtr are templates and process each
+   individually.
+
+   Process the xtr as a template by changing the extenions of templates to xtr.
+#+begin_src sh :exports both :results output
+cd examples/readme && ../../handlebar -r -n tree -e xtr fruits | tee fruits.xtr
+#+end_src
+
+#+results:
+: There are lots of fruits out there. Of all ["Redhaven", "Babygold", "Glo Haven"], the best is Glo Haven and the worst is Harbinger
+
+   Do the same for vegetables.xtr
+#+begin_src sh :exports both :results output
+cd examples/readme && ../../handlebar -r -n tree -e xtr vegetables | tee vegetables.xtr
+#+end_src
+
+#+results:
+: There are lots of vegetables out there. Of all ["Parsnip", "Beets", "Turnips", "Carrots"], the best is Carrot and the worst is Turnips
+
+   We now have fruits.xtr and vegetables.xtr in the root directory and
+   can munge them together into the template as we wanted to earlier.
+#+begin_src sh :exports both :results output
+cd examples/readme && ../../handlebar
+#+end_src
+
+#+results:
+: There are lots of fruits out there. Of all ["Redhaven", "Babygold", "Glo Haven"], the best is Glo Haven and the worst is Harbinger
+:  and There are lots of vegetables out there. Of all ["Parsnip", "Beets", "Turnips", "Carrots"], the best is Carrot and the worst is Turnips
+:
+
 
 ** TODO
 

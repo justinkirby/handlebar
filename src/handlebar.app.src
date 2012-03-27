@@ -21,6 +21,7 @@
   {env, [
          {template_ext, "src"},
          {vars_ext, "vars"},
+         {xtr_ext, "xtr"},
          {outdir,  undefined},
          {outfile, undefined},
          {navigate, "tree"}

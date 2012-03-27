@@ -19,10 +19,19 @@ process(FilesDirs) ->
 
     ?DEBUG("vars: ~p~n",[dict:fetch(var, VTs)]),
     ?DEBUG("templates: ~p~n",[dict:fetch(template, VTs)]),
+    ?DEBUG("extras: ~p~n",[dict:fetch(xtr, VTs)]),
     Ctx = build_context(dict:fetch(var,VTs),dict:new()),
     ?DEBUG("context: ~p~n",[dict:to_list(Ctx)]),
 
-    render_templates(dict:fetch(template, VTs), Ctx).
+    XtrExt = handlebar_config:get_global(xtr_ext, "xtr"),
+
+
+    FullCtx = xtr_templates(dict:fetch(xtr, VTs), Ctx, XtrExt),
+
+    ?DEBUG("full context: ~p~n",[dict:to_list(FullCtx)]),
+
+
+    render_templates(dict:fetch(template, VTs), FullCtx).
 
 
 
@@ -44,17 +53,28 @@ build_context([V|Vs], Acc) ->
     end.
 
 
+xtr_templates([], Ctx, _Ext) -> Ctx;
+xtr_templates([F|Fs], Ctx, Ext) ->
+    case file:read_file(F) of
+        {error, Reason} ->
+            ?ERROR("failed to open extra, ~p, ~p~n",[F,Reason]);
+        {ok, Data} ->
+            Rendered = mustachize(Data,Ctx),
+            Key = filename:basename(F,[$.|Ext]),
+            xtr_templates(Fs, dict:store(list_to_atom(Key), Rendered, Ctx), Ext)
+    end.
+
+
+
+
+
 render_templates([], _Ctx) -> ok;
 render_templates([T|Ts], Ctx) ->
     case file:read_file(T) of
         {error, Reason} ->
             ?ERROR("Failed to open template, ~p, ~p~n",[T,Reason]);
         {ok, Data} ->
-            ReOpts = [global, {return, list}],
-            Str0 = re:replace(Data, "\\\\", "\\\\\\", ReOpts),
-            Str1 = re:replace(Str0, "\"", "\\\\\"", ReOpts),
-            Output = mustache:render(Str1, Ctx),
-            handlebar_out:output(T,Output)
+            handlebar_out:output(T,mustachize(Data, Ctx))
     end,
     render_templates(Ts, Ctx).
 
@@ -111,3 +131,10 @@ consult(Cont, Str, Acc) ->
         {more, Cont1} ->
             consult(Cont1, eof, Acc)
     end.
+
+
+mustachize(Data, Ctx) ->
+    ReOpts = [global, {return, list}],
+    Str0 = re:replace(Data, "\\\\", "\\\\\\", ReOpts),
+    Str1 = re:replace(Str0, "\"", "\\\\\"", ReOpts),
+    mustache:render(Str1, Ctx).
